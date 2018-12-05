@@ -66,3 +66,5 @@ typings/
 .DS_Store
 storage/mongodb/WiredTiger
 storage/redis/dump.rdb
+storage/mongodb/*
+storage/redis/*
