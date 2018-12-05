@@ -63,7 +63,7 @@ export class ExplorerController {
     if (req.query.limit) pagination.limit = req.query.limit;
     if (req.query.skip) pagination.skip = req.query.skip;
 
-    res.json(this.userService.findFeatured(req.user, pagination));
+    res.json(await this.userService.findFeatured(req.user, pagination));
   }
 
   /**
@@ -73,13 +73,13 @@ export class ExplorerController {
    * @param res
    * @returns {Promise<void>}
    */
-  @httpGet('online')
+  @httpGet('/online')
   async online(req: AuthorizedRequest, res: Response): Promise<void> {
     let pagination: any = {};
     if (req.query.limit) pagination.limit = req.query.limit;
     if (req.query.skip) pagination.skip = req.query.skip;
 
-    res.json(this.userService.findOnline(req.user, pagination));
+    res.json(await this.userService.findOnline(req.user, pagination));
   }
 
 }
