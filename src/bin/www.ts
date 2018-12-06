@@ -44,7 +44,7 @@ createConnection(ormOptions).then(async connection => {
     const chatService: ChatServiceInterface = container.get(ChatServiceType);
     const sock = io.of('/');
     sock.use(async(socket, next) => {
-      logger.info('Handshaking: ', socket.handshake.query.token);
+      logger.error('Handshaking: ', socket.handshake.query.token);
       let handshake = socket.handshake;
       if (handshake.query.token) {
         const result = await authClient.verifyUserToken(handshake.query.token);
@@ -63,11 +63,11 @@ createConnection(ormOptions).then(async connection => {
       const user = socket.request.user;
       sockets[user.id] = socket;
       sockets[user.id].emit('loadConversations', await chatService.listConversations(user));
-      logger.info('User connected to socket', user.id);
+      logger.error('User connected to socket', user.id);
 
       socket.on('message', async(message) => {
         const textMessage = await chatService.sendMessage(user, message);
-        logger.info('Sending message from ', user.email, 'to ', message.receiverId);
+        logger.error('Sending message from ', user.email, 'to ', message.receiverId);
         if (sockets[message.receiverId]) {
           sockets[message.receiverId].emit('message', textMessage);
           sockets[message.receiverId].emit('loadConversations', await chatService.listConversations(message.receiverId));
@@ -75,7 +75,7 @@ createConnection(ormOptions).then(async connection => {
       });
 
       socket.on('createConversation', async(request) => {
-        logger.info('Creating conversation ', user.id.toString(), request.userId);
+        logger.error('Creating conversation ', user.id.toString(), request.userId);
         sockets[user._id.toString()].emit('conversationCreated',
           await chatService.findOrCreateConversation(user.id.toString(), request.userId)
         );
@@ -84,17 +84,17 @@ createConnection(ormOptions).then(async connection => {
       socket.on('loadMessages', async(request) => {
         const messages = await chatService.fetchMessages(request.conversationId);
         sockets[user._id.toString()].emit('messages', messages);
-        logger.info('Loading messages', messages);
+        logger.error('Loading messages', messages);
       });
 
       socket.on('fetchMoreMessages', async(request) => {
         const messages = await chatService.fetchMessages(request.conversationId, Number(request.key));
         sockets[user._id.toString()].emit('loadMoreMessages', messages);
-        logger.info('Fetching more', messages);
+        logger.error('Fetching more', messages);
       });
 
       socket.on('disconnect', (userId) => {
-        logger.info('Disconnected', userId);
+        logger.error('Disconnected', userId);
         delete sockets[userId.senderId];
       });
 
