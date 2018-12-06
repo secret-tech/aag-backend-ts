@@ -59,6 +59,10 @@ createConnection(ormOptions).then(async connection => {
       }
     });
 
+    socket.on('req:conversations', async(request) => {
+      sockets[user.id.toString()].emit('res:conversations', []);
+    });
+
     socket.on('req:frindOrCreateConversation', async(request) => {
       logger.debug('Creating conversation ', user.email, request.userId);
       // emit res:conversation
