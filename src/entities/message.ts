@@ -1,12 +1,11 @@
 import { Column, Entity, ObjectIdColumn, ObjectID } from 'typeorm';
 import { User } from './user';
-import { MessageUser } from './message.user';
 
 @Entity()
 export class Message {
 
   @ObjectIdColumn()
-  _d: ObjectID;
+  _id: ObjectID;
 
   @Column()
   conversation: string;
@@ -15,26 +14,24 @@ export class Message {
   timestamp: number;
 
   @Column()
-  text: string;
+  message: string;
 
   @Column()
-  user: MessageUser;
+  user: User;
 
   @Column()
-  receiver: MessageUser;
+  receiver: User;
 
-  @Column()
+  @Column(type => Date)
   createdAt: Date;
 
   constructor(sender: User, receiver: User, conversation: string, message: string) {
     this.timestamp = Date.now();
     this.createdAt = new Date();
-    console.log('Sender: ', sender);
-    console.log('conversation: ', conversation);
-    this.user = new MessageUser(sender.id.toString(), sender.firstName, sender.picture);
-    this.receiver = new MessageUser(receiver.id.toString(), receiver.firstName, receiver.picture);
+    this.user = sender;
+    this.receiver = receiver;
     this.conversation = conversation;
-    this.text = message;
+    this.message = message;
   }
 
 }
