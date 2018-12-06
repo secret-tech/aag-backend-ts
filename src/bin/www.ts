@@ -18,7 +18,7 @@ import { User } from '../entities/user';
  * Create HTTP server.
  */
 const httpServer = http.createServer(app);
-const io = socketio(httpServer, { pingTimeout: 60000 });
+const io = socketio(httpServer, { pingTimeout: 85000 });
 const ormOptions: ConnectionOptions = config.typeOrm as ConnectionOptions;
 const logger = Logger.getInstance('APP_LOG');
 
