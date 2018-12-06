@@ -93,7 +93,7 @@ export class ChatService implements ChatServiceInterface {
 
   private async previewConversation(user: User, friend: User, conversationId: string): Promise<ConversationPreview> {
     const messages = await getConnection().mongoManager.createEntityCursor(Message, { conversation: conversationId })
-        .limit(1)
+        .limit(10)
         .sort({ timestamp: -1 })
         .toArray();
     return { user, friend, messages, id: conversationId };

@@ -67,8 +67,10 @@ createConnection(ormOptions).then(async connection => {
     socket.on('loadMessages', async(request) => {
       logger.debug('Loading messages ' + request.conversationId);
       const messages = await chatService.fetchMessages(request.conversationId);
-      sockets[user.id.toString()].emit('messages', messages);
-      console.log('messages: ', messages);
+      sockets[user.id.toString()].emit('conversationCreated',
+        await chatService.findOrCreateConversation(user.id.toString(), request.userId)
+      );
+      console.log('messages: ', { messages });
     });
 
     socket.on('fetchMoreMessages', async(request) => {
