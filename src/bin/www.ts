@@ -77,7 +77,7 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('req:findOrCreateConversation', async(request) => {
       logger.debug('Creating conversation ', user.email, request.userId);
-      console.log('Create conversation request', request);
+      console.log('Create conversation request', request, user.id.toString(), user.email, Object.keys(sockets));
       const conversationId = chatService.getConversationId(user.id.toString(), request.userId);
       const existedBefore = await chatService.conversationExists(conversationId);
       const conversation = await chatService.findOrCreateConversation(user.id.toString(), request.userId);
