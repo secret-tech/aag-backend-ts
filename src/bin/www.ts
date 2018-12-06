@@ -19,7 +19,7 @@ import { Message } from '../entities/message';
  * Create HTTP server.
  */
 const httpServer = http.createServer(app);
-const io = socketio(httpServer, { pingTimeout: 85000 });
+const io = socketio(httpServer, { pingTimeout: 30000, pingInterval: 30000 });
 const ormOptions: ConnectionOptions = config.typeOrm as ConnectionOptions;
 const logger = Logger.getInstance('APP_LOG');
 
@@ -60,6 +60,17 @@ createConnection(ormOptions).then(async connection => {
       }
     });
 
+    socket.on('req:messages', async(request) => {
+      logger.debug('Loading messages ' + request.conversationId);
+      let messages;
+      if (request.key) {
+        messages = await chatService.fetchMessages(request.conversationId, Number(request.key));
+      } else { messages = await chatService.fetchMessages(request.conversationId); }
+      sockets[user.id.toString()].emit('res:messages',
+        messages
+      );
+    });
+
     socket.on('req:conversations', async(request) => {
       sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user));
     });
@@ -73,16 +84,6 @@ createConnection(ormOptions).then(async connection => {
       if (!existedBefore) {
         sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
       }
-    });
-
-    socket.on('req:messages', async(request) => {
-      logger.debug('Loading messages ' + request.conversationId);
-      let messages;
-      if (request.key) { messages = await chatService.fetchMessages(request.conversationId, Number(request.key)); }
-      else { messages = await chatService.fetchMessages(request.conversationId); }
-      sockets[user.id.toString()].emit('res:messages',
-        messages
-      );
     });
 
     socket.on('disconnect', (reason) => {
