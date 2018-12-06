@@ -10,9 +10,7 @@ declare interface TenantRegistrationResult extends RegistrationResult {
 
 declare interface ClientChatMessage {
   text: string;
-  senderId: string;
   conversationId: string;
-  _id?: string;
 }
 
 declare interface Query {

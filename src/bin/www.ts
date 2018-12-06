@@ -13,6 +13,7 @@ import { AuthException } from '../exceptions/exceptions';
 import { ChatServiceType } from '../services/chat.service';
 import { Logger } from '../logger';
 import { User } from '../entities/user';
+import { Message } from '../entities/message';
 
 /**
  * Create HTTP server.
@@ -51,8 +52,8 @@ createConnection(ormOptions).then(async connection => {
     sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user));
 
     socket.on('message', async(message) => {
-      const textMessage = await chatService.sendMessage(user, message);
-      logger.debug('Sending message from ', user.email, 'to ', message.receiverId);
+      const textMessage: Message = await chatService.sendMessage(user, message);
+      logger.debug('Sending message from ', user.email, 'to ', textMessage.receiver.email);
       if (sockets[message.receiverId]) {
         sockets[message.receiverId].emit('message', textMessage);
         sockets[message.receiverId].emit('res:conversations', await chatService.listConversations(message.receiverId));
@@ -82,12 +83,6 @@ createConnection(ormOptions).then(async connection => {
       sockets[user.id.toString()].emit('res:messages',
         messages
       );
-    });
-
-    socket.on('fetchMoreMessages', async(request) => {
-      const messages = await chatService.fetchMessages(request.conversationId, Number(request.key));
-      sockets[user.id.toString()].emit('loadMoreMessages', messages);
-      logger.debug('Fetching more', messages);
     });
 
     socket.on('disconnect', (reason) => {
