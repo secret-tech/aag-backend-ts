@@ -17,7 +17,6 @@ import { Logger } from '../logger';
  * Create HTTP server.
  */
 const httpServer = http.createServer(app);
-const io = socketio(httpServer);
 const ormOptions: ConnectionOptions = config.typeOrm as ConnectionOptions;
 const logger = Logger.getInstance('APP_LOG');
 
@@ -39,12 +38,13 @@ createConnection(ormOptions).then(async connection => {
     };
     const httpsServer = https.createServer(httpsOptions, app);
     httpsServer.listen(config.app.httpsPort);
-
+    const io = socketio.listen(httpServer);
     const authClient: AuthClientInterface = container.get(AuthClientType);
     const userService: UserServiceInterface = container.get(UserServiceType);
     const chatService: ChatServiceInterface = container.get(ChatServiceType);
     const sock = io.of('/');
     sock.use(async(socket, next) => {
+      logger.info('Handshaking: ', socket.handshake.query.token);
       let handshake = socket.handshake;
       if (handshake.query.token) {
         const result = await authClient.verifyUserToken(handshake.query.token);
