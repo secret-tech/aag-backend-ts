@@ -51,11 +51,11 @@ createConnection(ormOptions).then(async connection => {
 
     sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user));
 
-    socket.on('message', async(message) => {
+    socket.on('req:sendMessage', async(message) => {
       const textMessage: Message = await chatService.sendMessage(user, message);
       logger.debug('Sending message from ', user.email, 'to ', textMessage.receiver.email);
       if (sockets[message.receiverId]) {
-        sockets[message.receiverId].emit('message', textMessage);
+        sockets[message.receiverId].emit('res:receiveMessage', textMessage);
         sockets[message.receiverId].emit('res:conversations', await chatService.listConversations(message.receiverId));
       }
     });
