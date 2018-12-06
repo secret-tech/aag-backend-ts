@@ -15,7 +15,7 @@ export class Message {
   timestamp: number;
 
   @Column()
-  message: string;
+  text: string;
 
   @Column()
   user: MessageUser;
@@ -32,7 +32,7 @@ export class Message {
     this.user = new MessageUser(sender);
     this.receiver = new MessageUser(receiver);
     this.conversation = conversation;
-    this.message = message;
+    this.text = message;
   }
 
 }
