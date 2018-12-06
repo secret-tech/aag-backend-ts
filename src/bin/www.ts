@@ -19,7 +19,7 @@ import { Message } from '../entities/message';
  * Create HTTP server.
  */
 const httpServer = http.createServer(app);
-const io = socketio(httpServer, { pingTimeout: 30000, pingInterval: 30000 });
+const io = socketio(httpServer, { pingTimeout: 85000, pingInterval: 30000 });
 const ormOptions: ConnectionOptions = config.typeOrm as ConnectionOptions;
 const logger = Logger.getInstance('APP_LOG');
 
