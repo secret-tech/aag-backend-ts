@@ -21,6 +21,7 @@ export class ChatService implements ChatServiceInterface {
 
   /**
    * This method is fucked up
+   * 
    * TODO: find some better way to list converasations
    * @param user User
    */
@@ -43,6 +44,7 @@ export class ChatService implements ChatServiceInterface {
 
   /**
    * Fetch a new portion of messages
+   * 
    * @param conversationId id of conversation
    * @param key timestamp to look messages after
    */
