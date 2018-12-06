@@ -86,10 +86,6 @@ export class UserService implements UserServiceInterface {
     return getConnection().getMongoRepository(User).findOne(new ObjectId(userId));
   }
 
-  async findByEmail(email: string): Promise<User> {
-    
-  }
-
   async find(query: Partial<User>, pagination?: Partial<Query>): Promise<User[]> {
     const cursor = getConnection().mongoManager.createEntityCursor(User, query);
     if (pagination && pagination.limit) {
