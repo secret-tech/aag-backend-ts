@@ -13,10 +13,12 @@ export class MessageUser {
   @Column()
   avatar: string;
 
-  constructor(id: string, name: string, avatar: string) {
-    this._id = id;
-    this.name = name;
-    this.avatar = avatar;
+  static createMessageUser(user: User): MessageUser {
+    const msgUser = new MessageUser();
+    msgUser._id = user.id.toString();
+    msgUser.avatar = user.picture;
+    msgUser.name = user.firstName;
+    return msgUser;
   }
 
 }

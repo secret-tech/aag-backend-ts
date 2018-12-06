@@ -114,7 +114,7 @@ export class User {
     user.firstName = userData.first_name;
     user.lastName = userData.last_name;
     user.picture = userData.picture.data.url;
-    if(userData.oneSignal !== '') {
+    if (userData.oneSignal !== '') {
       user.services.oneSignal = userData.oneSignal;
     }
     return user;

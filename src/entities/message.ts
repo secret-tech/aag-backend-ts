@@ -30,6 +30,12 @@ export class Message {
   constructor(sender: User, receiver: User, conversation: string, message: string) {
     this.timestamp = Date.now();
     this.createdAt = new Date();
+    try {
+      this.user = MessageUser.createMessageUser(sender);
+      this.receiver = MessageUser.createMessageUser(receiver);
+    } catch (e) {
+      console.log(e);
+    }
     // this.user = new MessageUser(sender.id.toString(), sender.firstName, sender.picture);
     // this.receiver = new MessageUser(receiver.id.toString(), receiver.firstName, receiver.picture);
     this.conversation = conversation;
