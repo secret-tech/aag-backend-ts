@@ -40,7 +40,8 @@ createConnection(ormOptions).then(async connection => {
     }
   });
 
-  const sockets = {};
+  let sockets = {};
+
   sock.on('connection', async(socket) => {
     const user = socket.request.user;
     sockets[user.id.toString()] = socket;
@@ -57,6 +58,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('createConversation', async(request) => {
+      console.log(user, request.userId);
       logger.info('Creating conversation ', user.id.toString(), request.userId);
       sockets[user.id.toString()].emit('conversationCreated',
         await chatService.findOrCreateConversation(user.id.toString(), request.userId)
