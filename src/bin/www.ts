@@ -46,11 +46,11 @@ createConnection(ormOptions).then(async connection => {
     const user = socket.request.user;
     sockets[user.id.toString()] = socket;
     sockets[user.id.toString()].emit('loadConversations', await chatService.listConversations(user));
-    logger.info('User connected to socket', user.id.toString());
+    logger.debug('User connected to socket', user.id.toString());
 
     socket.on('message', async(message) => {
       const textMessage = await chatService.sendMessage(user, message);
-      logger.info('Sending message from ', user.email, 'to ', message.receiverId);
+      logger.debug('Sending message from ', user.email, 'to ', message.receiverId);
       if (sockets[message.receiverId]) {
         sockets[message.receiverId].emit('message', textMessage);
         sockets[message.receiverId].emit('loadConversations', await chatService.listConversations(message.receiverId));
@@ -58,8 +58,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('createConversation', async(request) => {
-      console.log(user, request.userId);
-      logger.info('Creating conversation ', user.id.toString(), request.userId);
+      logger.debug('Creating conversation ', user.id.toString(), request.userId);
       sockets[user.id.toString()].emit('conversationCreated',
         await chatService.findOrCreateConversation(user.id.toString(), request.userId)
       );
@@ -68,17 +67,17 @@ createConnection(ormOptions).then(async connection => {
     socket.on('loadMessages', async(request) => {
       const messages = await chatService.fetchMessages(request.conversationId);
       sockets[user.id.toString()].emit('messages', messages);
-      logger.info('Loading messages' + messages.toString());
+      logger.debug('Loading messages' + messages.toString());
     });
 
     socket.on('fetchMoreMessages', async(request) => {
       const messages = await chatService.fetchMessages(request.conversationId, Number(request.key));
       sockets[user.id.toString()].emit('loadMoreMessages', messages);
-      logger.info('Fetching more', messages);
+      logger.debug('Fetching more', messages);
     });
 
     socket.on('disconnect', (reason) => {
-      logger.info('Disconnected ' + user.id.toString() + ' ' + reason);
+      logger.debug('Disconnected ' + user.id.toString() + ' ' + reason);
       delete sockets[user.id.toString()];
     });
   });

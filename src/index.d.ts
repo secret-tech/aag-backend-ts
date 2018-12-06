@@ -146,7 +146,7 @@ declare interface ValidationResult extends Result {
 }
 
 declare interface ConversationPreview {
-  _id: string;
+  id: string;
   messages: any[];
   friend: any;
   user: any;

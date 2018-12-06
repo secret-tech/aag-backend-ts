@@ -36,7 +36,7 @@ export class ChatService implements ChatServiceInterface {
         .limit(1)
         .sort({ timestamp: -1 })
         .toArray();
-      converasations.push({ user, friend, messages, _id: conversation });
+      converasations.push({ user, friend, messages, id: conversation });
     }
     return converasations;
   }
@@ -88,7 +88,7 @@ export class ChatService implements ChatServiceInterface {
     friend.conversations.push(conversation);
     user.conversations.push(conversation);
     await getConnection().mongoManager.save([friend, user]);
-    return { user, friend, messages: [], _id: conversation };
+    return { user, friend, messages: [], id: conversation };
   }
 
   private async previewConversation(user: User, friend: User, conversationId: string): Promise<ConversationPreview> {
@@ -96,7 +96,7 @@ export class ChatService implements ChatServiceInterface {
         .limit(1)
         .sort({ timestamp: -1 })
         .toArray();
-    return { user, friend, messages, _id: conversationId };
+    return { user, friend, messages, id: conversationId };
   }
 
   private findAnotherUserId(from: string, conversationId: string): string {
