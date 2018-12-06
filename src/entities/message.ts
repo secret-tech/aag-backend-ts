@@ -1,7 +1,5 @@
 import { Column, Entity, ObjectIdColumn, ObjectID } from 'typeorm';
 import { User } from './user';
-import { MessageUser } from './message.user';
-import 'reflect-metadata';
 
 @Entity()
 export class Message {
@@ -16,30 +14,20 @@ export class Message {
   timestamp: number;
 
   @Column()
-  text: string;
+  message: string;
 
-  @Column(type => MessageUser)
-  user?: MessageUser;
+  @Column()
+  user: User;
 
-  @Column(type => MessageUser)
-  receiver?: MessageUser;
-
-  @Column(type => Date)
-  createdAt: Date;
+  @Column()
+  receiver: User;
 
   constructor(sender: User, receiver: User, conversation: string, message: string) {
     this.timestamp = Date.now();
-    this.createdAt = new Date();
-    try {
-      this.user = MessageUser.createMessageUser(sender);
-      this.receiver = MessageUser.createMessageUser(receiver);
-    } catch (e) {
-      console.log(e);
-    }
-    // this.user = new MessageUser(sender.id.toString(), sender.firstName, sender.picture);
-    // this.receiver = new MessageUser(receiver.id.toString(), receiver.firstName, receiver.picture);
+    this.user = sender;
+    this.receiver = receiver;
     this.conversation = conversation;
-    this.text = message;
+    this.message = message;
   }
 
 }

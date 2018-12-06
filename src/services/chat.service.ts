@@ -7,7 +7,7 @@ import { UserNotFound, ConversationNotFound } from '../exceptions/exceptions';
 @injectable()
 export class ChatService implements ChatServiceInterface {
 
-  async sendMessage(from: User, message: ClientChatMessage): Promise<Message> {
+  async sendMessage(from: User, message: ClientChatMessage): Promise<any> {
     const receiver = await getConnection().getRepository(User)
       .findOne(this.findAnotherUserId(from.id.toString(), message.conversationId));
     if (!receiver) throw new UserNotFound('Receiver not found');
@@ -17,7 +17,18 @@ export class ChatService implements ChatServiceInterface {
     }
     const messageToStore = new Message(from, receiver, message.conversationId, message.text);
     // TODO: queue push notification
-    return getConnection().mongoManager.save(messageToStore);
+    await getConnection().mongoManager.save(messageToStore);
+    return {
+      createdAt: new Date(messageToStore.timestamp).toISOString(),
+      _id: messageToStore._id.toString(),
+      text: messageToStore.message,
+      user: {
+        _id: messageToStore.user.id.toString(),
+        avatar: messageToStore.user.picture,
+        name: messageToStore.user.firstName
+      },
+      receiver: messageToStore.receiver
+    };
   }
 
   /**
@@ -38,7 +49,20 @@ export class ChatService implements ChatServiceInterface {
         .limit(1)
         .sort({ timestamp: -1 })
         .toArray();
-      converasations.push({ user, friend, messages, id: conversation });
+      const viewMessages = messages.map((message) => {
+        return {
+          createdAt: new Date(message.timestamp).toISOString(),
+          _id: message._id.toString(),
+          text: message.message,
+          user: {
+            _id: message.user.id.toString(),
+            avatar: message.user.picture,
+            name: message.user.firstName
+          },
+          receiver: message.receiver
+        };
+      });
+      converasations.push({ user, friend, messages: viewMessages, id: conversation });
     }
     return converasations;
   }
@@ -49,16 +73,42 @@ export class ChatService implements ChatServiceInterface {
    * @param conversationId id of conversation
    * @param key timestamp to look messages after
    */
-  async fetchMessages(conversationId: string, key?: number): Promise<Message[]> {
+  async fetchMessages(conversationId: string, key?: number): Promise<any[]> {
     if (key) {
-      return getConnection().mongoManager.createEntityCursor(Message, {
+      const messages = await getConnection().mongoManager.createEntityCursor(Message, {
         conversation: conversationId,
         timestamp: { $lte: key }
       }).sort({ timestamp: -1 }).limit(50).toArray();
+      return messages.map((message) => {
+        return {
+          createdAt: new Date(message.timestamp).toISOString(),
+          _id: message._id.toString(),
+          text: message.message,
+          user: {
+            _id: message.user.id.toString(),
+            avatar: message.user.picture,
+            name: message.user.firstName
+          },
+          receiver: message.receiver
+        };
+      });
     } else {
-      return getConnection().mongoManager.createEntityCursor(Message, {
+      const messages = await getConnection().mongoManager.createEntityCursor(Message, {
         conversation: conversationId
       }).sort({ timestamp: -1 }).limit(50).toArray();
+      return messages.map((message) => {
+        return {
+          createdAt: new Date(message.timestamp).toISOString(),
+          _id: message._id.toString(),
+          text: message.message,
+          user: {
+            _id: message.user.id.toString(),
+            avatar: message.user.picture,
+            name: message.user.firstName
+          },
+          receiver: message.receiver
+        };
+      });
     }
   }
 
