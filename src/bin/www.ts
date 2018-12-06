@@ -12,6 +12,7 @@ import { UserServiceType } from '../services/user.service';
 import { AuthException } from '../exceptions/exceptions';
 import { ChatServiceType } from '../services/chat.service';
 import { Logger } from '../logger';
+import { User } from '../entities/user';
 
 /**
  * Create HTTP server.
@@ -33,7 +34,7 @@ createConnection(ormOptions).then(async connection => {
     if (handshake.query.token) {
       const result = await authClient.verifyUserToken(handshake.query.token);
       socket.handshake.query.email = result.login;
-      socket.request.user = userService.findUserById(result.id);
+      socket.request.user = await connection.getMongoRepository(User).findOne({ email: result.login });
       next();
     } else {
       next(new AuthException('Authentication error'));
