@@ -42,32 +42,39 @@ createConnection(ormOptions).then(async connection => {
 
   let sockets = {};
 
+  // TODO: res:conversations
   sock.on('connection', async(socket) => {
-    const user = socket.request.user;
+    const user = await connection.getMongoRepository(User).findOne({ email: socket.handshake.query.email });
+    logger.debug('User connected to socket', user.email);
     sockets[user.id.toString()] = socket;
-    sockets[user.id.toString()].emit('loadConversations', await chatService.listConversations(user));
-    logger.debug('User connected to socket', user.id.toString());
+
+    sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user));
 
     socket.on('message', async(message) => {
       const textMessage = await chatService.sendMessage(user, message);
       logger.debug('Sending message from ', user.email, 'to ', message.receiverId);
       if (sockets[message.receiverId]) {
         sockets[message.receiverId].emit('message', textMessage);
-        sockets[message.receiverId].emit('loadConversations', await chatService.listConversations(message.receiverId));
+        sockets[message.receiverId].emit('res:conversations', await chatService.listConversations(message.receiverId));
       }
     });
 
-    socket.on('createConversation', async(request) => {
-      logger.debug('Creating conversation ', user.id.toString(), request.userId);
+    socket.on('req:frindOrCreateConversation', async(request) => {
+      logger.debug('Creating conversation ', user.email, request.userId);
+      // emit res:conversation
+      // emit res:conversations if new conversation created
       sockets[user.id.toString()].emit('conversationCreated',
         await chatService.findOrCreateConversation(user.id.toString(), request.userId)
       );
     });
 
-    socket.on('loadMessages', async(request) => {
+    socket.on('req:messages', async(request) => {
       logger.debug('Loading messages ' + request.conversationId);
-      sockets[user.id.toString()].emit('messages',
-        await chatService.findOrCreateConversation(user.id.toString(), request.userId)
+      let messages;
+      if (request.key) { messages = await chatService.fetchMessages(request.conversationId, Number(request.key)); }
+      else { messages = await chatService.fetchMessages(request.conversationId); }
+      sockets[user.id.toString()].emit('res:messages',
+        messages
       );
     });
 
