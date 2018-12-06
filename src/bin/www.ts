@@ -75,9 +75,9 @@ createConnection(ormOptions).then(async connection => {
       logger.info('Fetching more', messages);
     });
 
-    socket.on('disconnect', (userId) => {
-      logger.info('Disconnected', userId);
-      delete sockets[userId.senderId];
+    socket.on('disconnect', (reason) => {
+      logger.info('Disconnected ' + user.id.toString() + ' ' + reason);
+      delete sockets[user.id.toString()];
     });
   });
 
