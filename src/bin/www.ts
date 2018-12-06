@@ -60,7 +60,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:conversations', async(request) => {
-      sockets[user.id.toString()].emit('res:conversations', []);
+      sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user));
     });
 
     socket.on('req:findOrCreateConversation', async(request) => {
