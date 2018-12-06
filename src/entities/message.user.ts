@@ -13,10 +13,10 @@ export class MessageUser {
   @Column()
   avatar: string;
 
-  constructor(user: User) {
-    this._id = user.id.toString();
-    this.name = user.firstName;
-    this.avatar = user.picture;
+  constructor(id: string, name: string, avatar: string) {
+    this._id = id;
+    this.name = name;
+    this.avatar = avatar;
   }
 
 }
