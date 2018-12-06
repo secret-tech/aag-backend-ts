@@ -119,6 +119,8 @@ declare interface ChatServiceInterface {
   listConversations(user: any): Promise<ConversationPreview[]>;
   fetchMessages(conversationId: string, key?: number): Promise<any[]>;
   findOrCreateConversation(userId: string, companion: string): Promise<ConversationPreview>;
+  conversationExists(conversationId: string): Promise<boolean>;
+  getConversationId(userOneId: string, userTwoId: string): string;
 }
 
 declare interface Result {
@@ -147,9 +149,8 @@ declare interface ValidationResult extends Result {
 
 declare interface ConversationPreview {
   id: string;
-  messages: any[];
-  friend: any;
-  user: any;
+  users: any[];
+  lastMessage: any;
 }
 
 declare interface FacebookUserData {

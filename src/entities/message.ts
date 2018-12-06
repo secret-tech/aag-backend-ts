@@ -5,7 +5,7 @@ import { User } from './user';
 export class Message {
 
   @ObjectIdColumn()
-  _id: ObjectID;
+  id: ObjectID;
 
   @Column()
   conversation: string;

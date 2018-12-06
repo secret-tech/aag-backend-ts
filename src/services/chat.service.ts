@@ -17,18 +17,7 @@ export class ChatService implements ChatServiceInterface {
     }
     const messageToStore = new Message(from, receiver, message.conversationId, message.text);
     // TODO: queue push notification
-    await getConnection().mongoManager.save(messageToStore);
-    return {
-      createdAt: new Date(messageToStore.timestamp).toISOString(),
-      _id: messageToStore._id.toString(),
-      text: messageToStore.message,
-      user: {
-        _id: messageToStore.user.id.toString(),
-        avatar: messageToStore.user.picture,
-        name: messageToStore.user.firstName
-      },
-      receiver: messageToStore.receiver
-    };
+    return getConnection().mongoManager.save(messageToStore);
   }
 
   /**
@@ -45,24 +34,15 @@ export class ChatService implements ChatServiceInterface {
     const converasations: ConversationPreview[] = [];
     for (const conversation of user.conversations) {
       const friend = await getConnection().getRepository(User).findOne(this.findAnotherUserId(user.id.toString(), conversation));
+      let lastMessage = null;
       const messages = await getConnection().mongoManager.createEntityCursor(Message, { conversation })
         .limit(1)
         .sort({ timestamp: -1 })
         .toArray();
-      const viewMessages = messages.map((message) => {
-        return {
-          createdAt: new Date(message.timestamp).toISOString(),
-          _id: message._id.toString(),
-          text: message.message,
-          user: {
-            _id: message.user.id.toString(),
-            avatar: message.user.picture,
-            name: message.user.firstName
-          },
-          receiver: message.receiver
-        };
-      });
-      converasations.push({ user, friend, messages: viewMessages, id: conversation });
+      if (messages.length > 0) {
+        lastMessage = messages[0];
+      }
+      converasations.push({ users: [user, friend], lastMessage, id: conversation });
     }
     return converasations;
   }
@@ -75,51 +55,25 @@ export class ChatService implements ChatServiceInterface {
    */
   async fetchMessages(conversationId: string, key?: number): Promise<any[]> {
     if (key) {
-      const messages = await getConnection().mongoManager.createEntityCursor(Message, {
+      return getConnection().mongoManager.createEntityCursor(Message, {
         conversation: conversationId,
         timestamp: { $lte: key }
       }).sort({ timestamp: -1 }).limit(50).toArray();
-      return messages.map((message) => {
-        return {
-          createdAt: new Date(message.timestamp).toISOString(),
-          _id: message._id.toString(),
-          text: message.message,
-          user: {
-            _id: message.user.id.toString(),
-            avatar: message.user.picture,
-            name: message.user.firstName
-          },
-          receiver: message.receiver
-        };
-      });
     } else {
-      const messages = await getConnection().mongoManager.createEntityCursor(Message, {
+      return getConnection().mongoManager.createEntityCursor(Message, {
         conversation: conversationId
       }).sort({ timestamp: -1 }).limit(50).toArray();
-      return messages.map((message) => {
-        return {
-          createdAt: new Date(message.timestamp).toISOString(),
-          _id: message._id.toString(),
-          text: message.message,
-          user: {
-            _id: message.user.id.toString(),
-            avatar: message.user.picture,
-            name: message.user.firstName
-          },
-          receiver: message.receiver
-        };
-      });
     }
   }
 
   async findOrCreateConversation(userId: string, companion: string): Promise<ConversationPreview> {
     const friend = await getConnection().getRepository(User).findOne(companion);
     const user = await getConnection().getRepository(User).findOne(userId); // reloading user entity
+
     if (!friend) throw new UserNotFound('User with id ' + companion + ' not found');
     if (!user) throw new UserNotFound('User with id ' + userId + ' not found');
-    let convId;
-    if (user.id.toString() <= friend.id.toString()) convId = user.id.toString() + ':' + friend.id.toString();
-    else convId = friend.id.toString() + ':' + user.id.toString();
+
+    let convId = this.getConversationId(user.id.toString(), friend.id.toString());
     if (!await this.conversationExists(convId)) {
       return this.createConversation(user, friend, convId);
     } else {
@@ -127,7 +81,12 @@ export class ChatService implements ChatServiceInterface {
     }
   }
 
-  private async conversationExists(conversationId: string): Promise<boolean> {
+  getConversationId(userOneId: string, userTwoId: string): string {
+    if (userOneId <= userTwoId) return userOneId + ':' + userTwoId;
+    else return userTwoId + ':' + userOneId;
+  }
+
+  async conversationExists(conversationId: string): Promise<boolean> {
     const participants = await getConnection().mongoManager.createEntityCursor(User, {
       conversations: {
         $in: [conversationId]
