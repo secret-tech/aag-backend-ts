@@ -11,6 +11,7 @@ export class ChatService implements ChatServiceInterface {
     const receiver = await getConnection().getRepository(User)
       .findOne(this.findAnotherUserId(from.id.toString(), message.conversationId));
     if (!receiver) throw new UserNotFound('Receiver not found');
+    if (!from) throw new UserNotFound('Sender not found');
     if (!await this.conversationExists(message.conversationId)) {
       throw new ConversationNotFound('Conversation ' + message.conversationId + ' not found');
     }
