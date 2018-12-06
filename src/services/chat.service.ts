@@ -100,15 +100,20 @@ export class ChatService implements ChatServiceInterface {
     friend.conversations.push(conversation);
     user.conversations.push(conversation);
     await getConnection().mongoManager.save([friend, user]);
-    return { user, friend, messages: [], id: conversation };
+    const lastMessage = { id: 'system', conversation, timestamp: Date.now(), message: 'You have started new conversation', system: true };
+    return { users: [user, friend], lastMessage, id: conversation };
   }
 
   private async previewConversation(user: User, friend: User, conversationId: string): Promise<ConversationPreview> {
+    let lastMessage = null;
     const messages = await getConnection().mongoManager.createEntityCursor(Message, { conversation: conversationId })
-        .limit(10)
+        .limit(1)
         .sort({ timestamp: -1 })
         .toArray();
-    return { user, friend, messages, id: conversationId };
+    if (messages.length > 0) {
+      lastMessage = messages[0];
+    }
+    return { users: [user, friend], lastMessage, id: conversationId };
   }
 
   private findAnotherUserId(from: string, conversationId: string): string {
