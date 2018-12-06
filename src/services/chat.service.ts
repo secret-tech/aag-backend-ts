@@ -41,6 +41,8 @@ export class ChatService implements ChatServiceInterface {
         .toArray();
       if (messages.length > 0) {
         lastMessage = messages[0];
+      } else {
+        lastMessage = { id: 'system', conversation, timestamp: Date.now(), message: 'You have started new conversation', system: true };
       }
       converasations.push({ users: [user, friend], lastMessage, id: conversation });
     }
@@ -112,6 +114,8 @@ export class ChatService implements ChatServiceInterface {
         .toArray();
     if (messages.length > 0) {
       lastMessage = messages[0];
+    } else {
+      lastMessage = { id: 'system', conversation: conversationId, timestamp: Date.now(), message: 'You have started new conversation', system: true };
     }
     return { users: [user, friend], lastMessage, id: conversationId };
   }
