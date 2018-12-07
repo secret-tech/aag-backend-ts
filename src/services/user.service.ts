@@ -94,7 +94,9 @@ export class UserService implements UserServiceInterface {
       cursor.limit(10);
     }
     if (pagination && typeof pagination.skip !== 'undefined') {
-      cursor.skip(parseInt(pagination.skip, 10));
+      const skip = parseInt(pagination.skip, 10);
+      if (skip > 30) return [];
+      cursor.skip(skip);
     }
     if (pagination && pagination.sort) {
       cursor.sort(pagination.sort);
