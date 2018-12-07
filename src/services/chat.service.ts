@@ -42,7 +42,9 @@ export class ChatService implements ChatServiceInterface {
       if (messages.length > 0) {
         lastMessage = messages[0];
       } else {
-        lastMessage = await getConnection().mongoManager.save(new Message(conversation, 'Conversation created '));
+        lastMessage = new Message(conversation, 'Conversation created ');
+        lastMessage.system = true;
+        await getConnection().mongoManager.save(lastMessage);
       }
       conversations.push({ users: [user, friend], lastMessage, id: conversation });
     }
@@ -102,7 +104,9 @@ export class ChatService implements ChatServiceInterface {
     friend.conversations.push(conversation);
     user.conversations.push(conversation);
     await getConnection().mongoManager.save([friend, user]);
-    const lastMessage = await getConnection().mongoManager.save(new Message(conversation, 'Conversation created '));
+    const lastMessage = new Message(conversation, 'Conversation created ');
+    lastMessage.system = true;
+    await getConnection().mongoManager.save(lastMessage);
     return { users: [user, friend], lastMessage, id: conversation };
   }
 
@@ -115,7 +119,9 @@ export class ChatService implements ChatServiceInterface {
     if (messages.length > 0) {
       lastMessage = messages[0];
     } else {
-      lastMessage = await getConnection().mongoManager.save(new Message(conversationId, 'Conversation created '));
+      lastMessage = new Message(conversationId, 'Conversation created ');
+      lastMessage.system = true;
+      await getConnection().mongoManager.save(lastMessage);
     }
     return { users: [user, friend], lastMessage, id: conversationId };
   }
