@@ -89,6 +89,7 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('disconnect', (reason) => {
       logger.debug('Disconnected ' + user.id.toString() + ' ' + reason);
+      sockets[user.id.toString()].emit('disconnect', reason);
       delete sockets[user.id.toString()];
     });
   });
