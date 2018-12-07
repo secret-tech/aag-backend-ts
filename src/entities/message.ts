@@ -17,17 +17,21 @@ export class Message {
   message: string;
 
   @Column()
-  user: User;
+  user?: User;
 
   @Column()
-  receiver: User;
+  receiver?: User;
 
-  constructor(sender: User, receiver: User, conversation: string, message: string) {
+  @Column()
+  system?: boolean;
+
+  constructor(conversation: string, message: string, sender?: User, receiver?: User) {
     this.timestamp = Date.now();
     this.user = sender;
-    this.receiver = receiver;
     this.conversation = conversation;
     this.message = message;
+    if (receiver) this.receiver = receiver;
+    if (sender) this.user = sender;
   }
 
 }

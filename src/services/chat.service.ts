@@ -15,7 +15,7 @@ export class ChatService implements ChatServiceInterface {
     if (!await this.conversationExists(message.conversationId)) {
       throw new ConversationNotFound('Conversation ' + message.conversationId + ' not found');
     }
-    const messageToStore = new Message(from, receiver, message.conversationId, message.text);
+    const messageToStore = new Message(message.conversationId, message.text, from, receiver);
     // TODO: queue push notification
     return getConnection().mongoManager.save(messageToStore);
   }
@@ -102,7 +102,7 @@ export class ChatService implements ChatServiceInterface {
     friend.conversations.push(conversation);
     user.conversations.push(conversation);
     await getConnection().mongoManager.save([friend, user]);
-    const lastMessage = { id: 'system', conversation, timestamp: Date.now(), message: 'You have started new conversation', system: true };
+    const lastMessage = await getConnection().mongoManager.save(new Message(conversation, 'Conversation created '));
     return { users: [user, friend], lastMessage, id: conversation };
   }
 
@@ -115,7 +115,7 @@ export class ChatService implements ChatServiceInterface {
     if (messages.length > 0) {
       lastMessage = messages[0];
     } else {
-      lastMessage = { id: 'system', conversation: conversationId, timestamp: Date.now(), message: 'You have started new conversation', system: true };
+      const lastMessage = await getConnection().mongoManager.save(new Message(conversationId, 'Conversation created '));
     }
     return { users: [user, friend], lastMessage, id: conversationId };
   }
