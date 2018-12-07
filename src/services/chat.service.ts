@@ -115,7 +115,7 @@ export class ChatService implements ChatServiceInterface {
     if (messages.length > 0) {
       lastMessage = messages[0];
     } else {
-      const lastMessage = await getConnection().mongoManager.save(new Message(conversationId, 'Conversation created '));
+      lastMessage = await getConnection().mongoManager.save(new Message(conversationId, 'Conversation created '));
     }
     return { users: [user, friend], lastMessage, id: conversationId };
   }
