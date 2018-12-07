@@ -54,9 +54,9 @@ createConnection(ormOptions).then(async connection => {
     socket.on('req:sendMessage', async(message) => {
       const textMessage: Message = await chatService.sendMessage(user, message);
       logger.debug('Sending message from ', user.email, 'to ', textMessage.receiver.email);
-      if (sockets[message.receiverId]) {
-        sockets[message.receiverId].emit('res:receiveMessage', textMessage);
-        sockets[message.receiverId].emit('res:conversations', await chatService.listConversations(message.receiverId));
+      if (sockets[textMessage.receiver.id.toString()]) {
+        sockets[textMessage.receiver.id.toString()].emit('res:receiveMessage', textMessage);
+        sockets[textMessage.receiver.id.toString()].emit('res:conversations', await chatService.listConversations(textMessage.receiver.id.toString()));
       }
     });
 
