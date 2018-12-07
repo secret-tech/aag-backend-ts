@@ -15,6 +15,7 @@ export function validateUser(user: User) {
     gender: Joi.string().valid(['male', 'female', 'other']).required(),
     role: Joi.string().valid([User.ROLE_USER, User.ROLE_ADVISOR, User.ROLE_ADMIN]).required(),
     picture: Joi.string().uri({ scheme: ['http', 'https'] }),
+    pictures: Joi.array(),
     services: Joi.object({
       facebook: Joi.string().required(),
       oneSignal: Joi.string()
@@ -26,7 +27,7 @@ export function validateUser(user: User) {
     id: Joi.any(),
     _id: Joi.any(),
     bio: Joi.string(),
-    tags: Joi.array().items(Joi.string()),
+    tags: Joi.array(),
     conversations: Joi.array().items(Joi.string())
   });
 
