@@ -84,7 +84,8 @@ export class User {
     user.createdAt = new Date();
     user.role = User.ROLE_USER;
     user.conversations = [];
-
+    user.pictures = [];
+    user.tags = [];
     if (!userData.gender) {
       user.gender = 'male';
     } else {
