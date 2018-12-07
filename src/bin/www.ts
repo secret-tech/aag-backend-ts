@@ -109,9 +109,12 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('exchange', function(data) {
-      console.log('exchange', data);
       data.from = user.id.toString();
-      sockets[data.to].emit('exchange', data);
+      if (sockets[data.to]) {
+        sockets[data.to].emit('exchange', data);
+      } else {
+        logger.debug('Receiver ' + data.to + 'disconnected from socket');
+      }
     });
 
     socket.on('disconnect', (reason) => {
