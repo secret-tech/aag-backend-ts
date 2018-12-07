@@ -31,7 +31,7 @@ export class ChatService implements ChatServiceInterface {
       user = await getConnection().getRepository(User).findOne(user);
       if (!user) throw new UserNotFound('User ' + user + ' not found');
     }
-    const converasations: ConversationPreview[] = [];
+    const conversations: ConversationPreview[] = [];
     for (const conversation of user.conversations) {
       const friend = await getConnection().getRepository(User).findOne(this.findAnotherUserId(user.id.toString(), conversation));
       let lastMessage = null;
@@ -42,11 +42,11 @@ export class ChatService implements ChatServiceInterface {
       if (messages.length > 0) {
         lastMessage = messages[0];
       } else {
-        lastMessage = { id: 'system', conversation, timestamp: Date.now(), message: 'You have started new conversation', system: true };
+        lastMessage = await getConnection().mongoManager.save(new Message(conversation, 'Conversation created '));
       }
-      converasations.push({ users: [user, friend], lastMessage, id: conversation });
+      conversations.push({ users: [user, friend], lastMessage, id: conversation });
     }
-    return converasations;
+    return conversations;
   }
 
   /**
