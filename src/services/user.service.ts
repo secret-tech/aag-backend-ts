@@ -88,12 +88,12 @@ export class UserService implements UserServiceInterface {
 
   async find(query: Partial<User>, pagination?: Partial<Query>): Promise<User[]> {
     const cursor = getConnection().mongoManager.createEntityCursor(User, query);
-    if (pagination && pagination.limit) {
+    if (pagination && typeof pagination.limit !== 'undefined') {
       cursor.limit(parseInt(pagination.limit, 10));
     } else {
       cursor.limit(10);
     }
-    if (pagination && pagination.skip) {
+    if (pagination && typeof pagination.skip !== 'undefined') {
       cursor.skip(parseInt(pagination.skip, 10));
     }
     if (pagination && pagination.sort) {
