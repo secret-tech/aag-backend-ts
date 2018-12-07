@@ -76,8 +76,6 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:findOrCreateConversation', async(request) => {
-      logger.debug('Creating conversation ', user.email, request.userId);
-      console.log('Create conversation request', request, user.id.toString(), user.email, Object.keys(sockets));
       const conversationId = chatService.getConversationId(user.id.toString(), request.userId);
       const existedBefore = await chatService.conversationExists(conversationId);
       const conversation = await chatService.findOrCreateConversation(user.id.toString(), request.userId);
@@ -85,6 +83,35 @@ createConnection(ormOptions).then(async connection => {
       if (!existedBefore) {
         sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
       }
+    });
+
+    socket.on('req:call', async(request) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
+    });
+
+    socket.on('req:acceptCall', async(request) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
+    });
+
+    socket.on('req:declineCall', async(request) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
+    });
+
+    socket.on('join', function(name, callback) {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), name);
+      console.log('join', name);
+      callback([friendId]);
+      socket.join(name);
+      sockets[user.id.toString()].room = name;
+    });
+
+    socket.on('exchange', function(data) {
+      console.log('exchange', data);
+      data.from = user.id.toString();
+      sockets[data.to].emit('exchange', data);
     });
 
     socket.on('disconnect', (reason) => {

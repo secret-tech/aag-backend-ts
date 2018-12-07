@@ -119,6 +119,7 @@ declare interface ChatServiceInterface {
   findOrCreateConversation(userId: string, companion: string): Promise<ConversationPreview>;
   conversationExists(conversationId: string): Promise<boolean>;
   getConversationId(userOneId: string, userTwoId: string): string;
+  findAnotherUserId(from: string, conversationId: string): string;
 }
 
 declare interface Result {

@@ -126,7 +126,7 @@ export class ChatService implements ChatServiceInterface {
     return { users: [user, friend], lastMessage, id: conversationId };
   }
 
-  private findAnotherUserId(from: string, conversationId: string): string {
+  findAnotherUserId(from: string, conversationId: string): string {
     const convParts = conversationId.split(':');
     return convParts[0] === from ? convParts[1] : convParts[0];
   }
