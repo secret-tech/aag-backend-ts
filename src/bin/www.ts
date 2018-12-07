@@ -19,7 +19,7 @@ import { Message } from '../entities/message';
  * Create HTTP server.
  */
 const httpServer = http.createServer(app);
-const io = socketio(httpServer, { pingTimeout: 85000, pingInterval: 30000 });
+const io = socketio(httpServer, { pingTimeout: 150000, pingInterval: 30000 });
 const ormOptions: ConnectionOptions = config.typeOrm as ConnectionOptions;
 const logger = Logger.getInstance('APP_LOG');
 
@@ -89,7 +89,6 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('disconnect', (reason) => {
       logger.debug('Disconnected ' + user.id.toString() + ' ' + reason);
-      sockets[user.id.toString()].emit('disconnect', reason);
       delete sockets[user.id.toString()];
     });
   });
