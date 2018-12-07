@@ -61,7 +61,7 @@ export class ChatService implements ChatServiceInterface {
     if (key) {
       return getConnection().mongoManager.createEntityCursor(Message, {
         conversation: conversationId,
-        timestamp: { $lte: key }
+        timestamp: { $lt: key }
       }).sort({ timestamp: -1 }).limit(50).toArray();
     } else {
       return getConnection().mongoManager.createEntityCursor(Message, {
