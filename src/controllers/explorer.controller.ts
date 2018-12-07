@@ -44,8 +44,8 @@ export class ExplorerController {
   @httpGet('/new')
   async exploreNew(req: AuthorizedRequest, res: Response): Promise<void> {
     let pagination: any = {};
-    if (req.query.limit) pagination.limit = req.query.limit;
-    if (req.query.skip) pagination.skip = req.query.skip;
+    if (typeof req.query.limit !== 'undefined') pagination.limit = req.query.limit;
+    if (typeof req.query.skip !== 'undefined') pagination.skip = req.query.skip;
 
     res.json(await this.userService.findNew(req.user, pagination));
   }
@@ -60,8 +60,8 @@ export class ExplorerController {
   @httpGet('/featured')
   async featured(req: AuthorizedRequest, res: Response): Promise<void> {
     let pagination: any = {};
-    if (req.query.limit) pagination.limit = req.query.limit;
-    if (req.query.skip) pagination.skip = req.query.skip;
+    if (typeof req.query.limit !== 'undefined') pagination.limit = req.query.limit;
+    if (typeof req.query.skip !== 'undefined') pagination.skip = req.query.skip;
 
     res.json(await this.userService.findFeatured(req.user, pagination));
   }
@@ -76,8 +76,8 @@ export class ExplorerController {
   @httpGet('/online')
   async online(req: AuthorizedRequest, res: Response): Promise<void> {
     let pagination: any = {};
-    if (req.query.limit) pagination.limit = req.query.limit;
-    if (req.query.skip) pagination.skip = req.query.skip;
+    if (typeof req.query.limit !== 'undefined') pagination.limit = req.query.limit;
+    if (typeof req.query.skip !== 'undefined') pagination.skip = req.query.skip;
 
     res.json(await this.userService.findOnline(req.user, pagination));
   }
