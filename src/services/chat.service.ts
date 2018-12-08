@@ -127,6 +127,7 @@ export class ChatService implements ChatServiceInterface {
   }
 
   findAnotherUserId(from: string, conversationId: string): string {
+    console.log('Conversation id: ', conversationId);
     if (typeof conversationId !== 'string') throw new CustomError('ConversationId must be a string');
     const convParts = conversationId.split(':');
     return convParts[0] === from ? convParts[1] : convParts[0];
