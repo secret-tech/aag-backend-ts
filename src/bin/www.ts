@@ -101,11 +101,15 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('join', function(name, callback) {
-      const friendId = chatService.findAnotherUserId(user.id.toString(), name);
-      console.log('join', name);
-      callback([friendId]);
-      socket.join(name);
-      sockets[user.id.toString()].room = name;
+      try {
+        const friendId = chatService.findAnotherUserId(user.id.toString(), name);
+        console.log('join', name);
+        callback([friendId]);
+        socket.join(name);
+        sockets[user.id.toString()].room = name;
+      } catch (err) {
+        logger.error('ConversationId npt found');
+      }
     });
 
     socket.on('exchange', function(data) {
