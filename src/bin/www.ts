@@ -114,35 +114,35 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:offer', (data) => {
-      console.log('Offer ', data);
+      sockets[data.to].emit('res:offer', data);
     });
 
     socket.on('req:answer', (data) => {
-      console.log('Answer ', data);
+      sockets[data.to].emit('res:answer', data);
     });
 
-    socket.on('join', function(name, callback) {
-      try {
-        const friendId = chatService.findAnotherUserId(user.id.toString(), name);
-        logger.debug('join', name);
-        callback([friendId]);
-        socket.join(name);
-        sockets[user.id.toString()].room = name;
-      } catch (err) {
-        logger.warn('User failed request: ' + user.email);
-        logger.error('ConversationId not found');
-      }
-    });
+    // socket.on('join', function(name, callback) {
+    //   try {
+    //     const friendId = chatService.findAnotherUserId(user.id.toString(), name);
+    //     logger.debug('join', name);
+    //     callback([friendId]);
+    //     socket.join(name);
+    //     sockets[user.id.toString()].room = name;
+    //   } catch (err) {
+    //     logger.warn('User failed request: ' + user.email);
+    //     logger.error('ConversationId not found');
+    //   }
+    // });
 
-    socket.on('exchange', function(data) {
-      data.from = user.id.toString();
-      logger.debug('User initiated exchange ' + data.from);
-      if (sockets[data.to]) {
-        sockets[data.to].emit('exchange', data);
-      } else {
-        logger.debug('Receiver ' + data.to + 'disconnected from socket');
-      }
-    });
+    // socket.on('exchange', function(data) {
+    //   data.from = user.id.toString();
+    //   logger.debug('User initiated exchange ' + data.from);
+    //   if (sockets[data.to]) {
+    //     sockets[data.to].emit('exchange', data);
+    //   } else {
+    //     logger.debug('Receiver ' + data.to + 'disconnected from socket');
+    //   }
+    // });
 
     socket.on('disconnect', (reason) => {
       logger.debug('Disconnected ' + user.id.toString() + ' ' + reason);
