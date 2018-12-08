@@ -115,7 +115,7 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('exchange', function(data) {
       data.from = user.id.toString();
-      logger.info('User initiated exchange ' + data.from);
+      logger.debug('User initiated exchange ' + data.from);
       if (sockets[data.to]) {
         sockets[data.to].emit('exchange', data);
       } else {
