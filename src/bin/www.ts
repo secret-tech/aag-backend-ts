@@ -104,7 +104,7 @@ createConnection(ormOptions).then(async connection => {
       try {
         const friendId = chatService.findAnotherUserId(user.id.toString(), name);
         logger.debug('join', name);
-        callback([friendId]);
+        callback([friendId, user.id.toString()]);
         socket.join(name);
         sockets[user.id.toString()].room = name;
       } catch (err) {
