@@ -53,7 +53,6 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('req:sendMessage', async(message) => {
       const textMessage: Message = await chatService.sendMessage(user, message);
-      logger.debug('Sending message from ', user.email, 'to ', textMessage.receiver.email);
       if (sockets[textMessage.receiver.id.toString()]) {
         sockets[textMessage.receiver.id.toString()].emit('res:receiveMessage', textMessage);
         sockets[textMessage.receiver.id.toString()].emit('res:conversations', await chatService.listConversations(textMessage.receiver.id.toString()));
@@ -61,7 +60,6 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:messages', async(request) => {
-      logger.debug('Loading messages ' + request.conversationId);
       let messages;
       if (request.key) {
         messages = await chatService.fetchMessages(request.conversationId, Number(request.key));
@@ -86,11 +84,13 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:call', async(request) => {
+      logger.debug('Call started by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
       sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
     });
 
     socket.on('req:acceptCall', async(request) => {
+      logger.debug('Call accepted by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
       sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
     });
@@ -103,7 +103,7 @@ createConnection(ormOptions).then(async connection => {
     socket.on('join', function(name, callback) {
       try {
         const friendId = chatService.findAnotherUserId(user.id.toString(), name);
-        console.log('join', name);
+        logger.debug('join', name);
         callback([friendId]);
         socket.join(name);
         sockets[user.id.toString()].room = name;
