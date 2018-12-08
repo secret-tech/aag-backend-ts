@@ -105,6 +105,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:imReady', async(conversationId) => {
+      logger.debug(user.email + 'ready for handling call');
       if (!calls[conversationId]) throw new CustomError('Requested conversation call does not exist');
       if (calls[conversationId].caller.id === user.id.toString()) calls[conversationId].caller.ready = true;
       if (calls[conversationId].callee.id === user.id.toString()) calls[conversationId].callee.ready = true;
@@ -114,10 +115,12 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:offer', (data) => {
+      logger.debug(user.email + 'sent an offer');
       sockets[data.to].emit('res:offer', data);
     });
 
     socket.on('req:answer', (data) => {
+      logger.debug(user.email + 'sent an answer');
       sockets[data.to].emit('res:answer', data);
     });
 
