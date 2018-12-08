@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { User } from '../entities/user';
 import { Message } from '../entities/message';
 import { ObjectID, getConnection } from 'typeorm';
-import { UserNotFound, ConversationNotFound } from '../exceptions/exceptions';
+import { UserNotFound, ConversationNotFound, CustomError } from '../exceptions/exceptions';
 
 @injectable()
 export class ChatService implements ChatServiceInterface {
@@ -127,6 +127,7 @@ export class ChatService implements ChatServiceInterface {
   }
 
   findAnotherUserId(from: string, conversationId: string): string {
+    if (typeof conversationId !== 'string') throw new CustomError('ConversationId must be a string');
     const convParts = conversationId.split(':');
     return convParts[0] === from ? convParts[1] : convParts[0];
   }
