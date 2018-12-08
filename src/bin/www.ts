@@ -109,12 +109,13 @@ createConnection(ormOptions).then(async connection => {
         sockets[user.id.toString()].room = name;
       } catch (err) {
         logger.warn('User failed request: ' + user.email);
-        logger.error('ConversationId npt found');
+        logger.error('ConversationId not found');
       }
     });
 
     socket.on('exchange', function(data) {
       data.from = user.id.toString();
+      logger.info('User initiated exchange ' + data.from);
       if (sockets[data.to]) {
         sockets[data.to].emit('exchange', data);
       } else {
