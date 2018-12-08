@@ -108,6 +108,7 @@ createConnection(ormOptions).then(async connection => {
         socket.join(name);
         sockets[user.id.toString()].room = name;
       } catch (err) {
+        logger.warn('User failed request: ' + user.email);
         logger.error('ConversationId npt found');
       }
     });
