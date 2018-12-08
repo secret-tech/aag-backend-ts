@@ -110,6 +110,7 @@ createConnection(ormOptions).then(async connection => {
       if (calls[conversationId].caller.id === user.id.toString()) calls[conversationId].caller.ready = true;
       if (calls[conversationId].callee.id === user.id.toString()) calls[conversationId].callee.ready = true;
       if (calls[conversationId].callee.ready === true && calls[conversationId].caller.ready === true) {
+        logger.debug('Tell caller to init call: ', calls[conversationId].caller.id);
         sockets[calls[conversationId].caller.id].emit('res:uCaller');
       }
     });
