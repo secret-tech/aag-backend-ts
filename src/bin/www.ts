@@ -117,12 +117,14 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('req:offer', (data) => {
       logger.debug(user.email + ' sent an offer');
-      sockets[data.to].emit('res:offer', data);
+      const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
+      sockets[friendId].emit('res:offer', data);
     });
 
     socket.on('req:answer', (data) => {
       logger.debug(user.email + ' sent an answer');
-      sockets[data.to].emit('res:answer', data);
+      const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
+      sockets[friendId].emit('res:answer', data);
     });
 
     // socket.on('join', function(name, callback) {
