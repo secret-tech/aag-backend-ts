@@ -9,7 +9,7 @@ import { createConnection, ConnectionOptions } from 'typeorm';
 import { AuthClientType } from '../services/auth.client';
 import { container } from '../ioc.container';
 import { UserServiceType } from '../services/user.service';
-import { AuthException } from '../exceptions/exceptions';
+import { AuthException, CustomError } from '../exceptions/exceptions';
 import { ChatServiceType } from '../services/chat.service';
 import { Logger } from '../logger';
 import { User } from '../entities/user';
@@ -42,6 +42,7 @@ createConnection(ormOptions).then(async connection => {
   });
 
   let sockets = {};
+  let calls = {};
 
   // TODO: res:conversations
   sock.on('connection', async(socket) => {
@@ -84,8 +85,11 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:call', async(request) => {
-      logger.debug('Call started by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      calls[request.conversationId] = {
+        caller: { id: user.id.toString(), ready: false },
+        callee: { id: friendId, ready: false }
+      };
       sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
     });
 
@@ -98,6 +102,23 @@ createConnection(ormOptions).then(async connection => {
     socket.on('req:declineCall', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
       sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
+    });
+
+    socket.on('req:imReady', async(conversationId) => {
+      if (!calls[conversationId]) throw new CustomError('Requested conversation call does not exist');
+      if (calls[conversationId].caller.id === user.id.toString()) calls[conversationId].caller.ready = true;
+      if (calls[conversationId].callee.id === user.id.toString()) calls[conversationId].callee.ready = true;
+      if (calls[conversationId].callee.ready === true && calls[conversationId].caller.ready === true) {
+        sockets[calls[conversationId].caller.id].emit('res:uCaller');
+      }
+    });
+
+    socket.on('req:offer', (data) => {
+      console.log('Offer ', data);
+    });
+
+    socket.on('req:answer', (data) => {
+      console.log('Answer ', data);
     });
 
     socket.on('join', function(name, callback) {
