@@ -127,6 +127,11 @@ createConnection(ormOptions).then(async connection => {
       sockets[friendId].emit('res:answer', data);
     });
 
+    socket.on('req:ice', (data) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
+      sockets[friendId].emit('res:ice', data);
+    });
+
     // socket.on('join', function(name, callback) {
     //   try {
     //     const friendId = chatService.findAnotherUserId(user.id.toString(), name);
