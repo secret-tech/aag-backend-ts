@@ -126,6 +126,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:hangup', async(conversationId) => {
+      console.log('ConversationId: ', conversationId);
       const friendId = chatService.findAnotherUserId(user.id.toString(), conversationId);
       const systemMessage = await chatService.sendSystemMessage(conversationId, 'Call ended');
       if (sockets[friendId]) {
