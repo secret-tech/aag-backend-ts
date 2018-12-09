@@ -125,11 +125,11 @@ createConnection(ormOptions).then(async connection => {
       // Add declined call system message
     });
 
-    socket.on('req:hangup', async(request) => {
-      const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Call ended');
+    socket.on('req:hangup', async(conversationId) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), conversationId);
+      const systemMessage = await chatService.sendSystemMessage(conversationId, 'Call ended');
       if (sockets[friendId]) {
-        sockets[friendId].emit('res:hangup', { conversationId: request.conversationId });
+        sockets[friendId].emit('res:hangup', { conversationId: conversationId });
         sockets[friendId].emit('res:receiveMessage', systemMessage);
         sockets[friendId].emit('res:conversations', await chatService.listConversations(friendId));
       }
