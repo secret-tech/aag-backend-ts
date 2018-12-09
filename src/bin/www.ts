@@ -90,18 +90,18 @@ createConnection(ormOptions).then(async connection => {
         caller: { id: user.id.toString(), ready: false },
         callee: { id: friendId, ready: false }
       };
-      sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
+      if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
     });
 
     socket.on('req:acceptCall', async(request) => {
       logger.debug('Call accepted by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
+      if (sockets[friendId]) sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
     });
 
     socket.on('req:declineCall', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
+      if (sockets[friendId]) sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
     });
 
     socket.on('req:imReady', async(conversationId) => {
@@ -118,7 +118,7 @@ createConnection(ormOptions).then(async connection => {
     socket.on('req:offer', (data) => {
       logger.debug(user.email + ' sent an offer');
       const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
-      sockets[friendId].emit('res:offer', data);
+      if (sockets[friendId]) sockets[friendId].emit('res:offer', data);
     });
 
     socket.on('req:answer', (data) => {
