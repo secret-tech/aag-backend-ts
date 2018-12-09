@@ -92,30 +92,49 @@ createConnection(ormOptions).then(async connection => {
       };
       if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
       else {
-        await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+        const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+        sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
+        sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
       }
     });
 
     socket.on('req:acceptCall', async(request) => {
       logger.debug('Call accepted by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Call started');
       if (sockets[friendId]) {
         sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
-        await chatService.sendSystemMessage(request.conversationId, 'Call started');
+        sockets[friendId].emit('res:receiveMessage', systemMessage);
+        sockets[friendId].emit('res:conversations', await chatService.listConversations(friendId));
+        sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
+        sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
       }
     });
 
     socket.on('req:declineCall', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      if (sockets[friendId]) sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
-      await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+      const friend = await userService.findUserById(friendId);
+      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + friend.firstName);
+      if (sockets[friendId]) {
+        sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
+        sockets[friendId].emit('res:receiveMessage', systemMessage);
+        sockets[friendId].emit('res:conversations', await chatService.listConversations(friendId));
+      }
+      sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
+      sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
       // Add declined call system message
     });
 
     socket.on('req:hangup', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      if (sockets[friendId]) sockets[friendId].emit('res:hangup', { conversationId: request.conversationId });
-      await chatService.sendSystemMessage(request.conversationId, 'Call ended');
+      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Call ended');
+      if (sockets[friendId]) {
+        sockets[friendId].emit('res:hangup', { conversationId: request.conversationId });
+        sockets[friendId].emit('res:receiveMessage', systemMessage);
+        sockets[friendId].emit('res:conversations', await chatService.listConversations(friendId));
+      }
+      sockets[friendId].emit('res:receiveMessage', systemMessage);
+      sockets[friendId].emit('res:conversations', await chatService.listConversations(user.id.toString()));
     });
 
     socket.on('req:imReady', async(conversationId) => {
