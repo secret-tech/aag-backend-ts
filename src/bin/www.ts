@@ -91,17 +91,31 @@ createConnection(ormOptions).then(async connection => {
         callee: { id: friendId, ready: false }
       };
       if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
+      else {
+        await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+      }
     });
 
     socket.on('req:acceptCall', async(request) => {
       logger.debug('Call accepted by user: ', user.email);
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      if (sockets[friendId]) sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
+      if (sockets[friendId]) {
+        sockets[friendId].emit('res:callAccepted', { conversationId: request.conversationId });
+        await chatService.sendSystemMessage(request.conversationId, 'Call started');
+      }
     });
 
     socket.on('req:declineCall', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
       if (sockets[friendId]) sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
+      await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+      // Add declined call system message
+    });
+
+    socket.on('req:hangup', async(request) => {
+      const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      if (sockets[friendId]) sockets[friendId].emit('res:hangup', { conversationId: request.conversationId });
+      await chatService.sendSystemMessage(request.conversationId, 'Call ended');
     });
 
     socket.on('req:imReady', async(conversationId) => {
@@ -116,45 +130,19 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:offer', (data) => {
-      logger.debug(user.email + ' sent an offer');
       const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
       if (sockets[friendId]) sockets[friendId].emit('res:offer', data);
     });
 
     socket.on('req:answer', (data) => {
-      logger.debug(user.email + ' sent an answer');
       const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
-      sockets[friendId].emit('res:answer', data);
+      if (sockets[friendId]) sockets[friendId].emit('res:answer', data);
     });
 
     socket.on('req:ice', (data) => {
-      logger.debug('Ice exchange: ', user.email, data.conversationId);
       const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
-      sockets[friendId].emit('res:ice', data);
+      if (sockets[friendId]) sockets[friendId].emit('res:ice', data);
     });
-
-    // socket.on('join', function(name, callback) {
-    //   try {
-    //     const friendId = chatService.findAnotherUserId(user.id.toString(), name);
-    //     logger.debug('join', name);
-    //     callback([friendId]);
-    //     socket.join(name);
-    //     sockets[user.id.toString()].room = name;
-    //   } catch (err) {
-    //     logger.warn('User failed request: ' + user.email);
-    //     logger.error('ConversationId not found');
-    //   }
-    // });
-
-    // socket.on('exchange', function(data) {
-    //   data.from = user.id.toString();
-    //   logger.debug('User initiated exchange ' + data.from);
-    //   if (sockets[data.to]) {
-    //     sockets[data.to].emit('exchange', data);
-    //   } else {
-    //     logger.debug('Receiver ' + data.to + 'disconnected from socket');
-    //   }
-    // });
 
     socket.on('disconnect', (reason) => {
       logger.debug('Disconnected ' + user.id.toString() + ' ' + reason);

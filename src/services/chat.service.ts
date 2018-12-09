@@ -21,6 +21,17 @@ export class ChatService implements ChatServiceInterface {
   }
 
   /**
+   * Send system message to specified conversation
+   * @param conversationId conversation to  send system message to
+   * @param message message content
+   */
+  async sendSystemMessage(conversationId: string, message: string) {
+    const systemMessage = new Message(conversationId, message);
+    systemMessage.system = true;
+    return getConnection().mongoManager.save(systemMessage);
+  }
+
+  /**
    * This method is fucked up
    * 
    * TODO: find some better way to list converasations

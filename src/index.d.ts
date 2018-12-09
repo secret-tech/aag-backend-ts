@@ -120,6 +120,7 @@ declare interface ChatServiceInterface {
   conversationExists(conversationId: string): Promise<boolean>;
   getConversationId(userOneId: string, userTwoId: string): string;
   findAnotherUserId(from: string, conversationId: string): string;
+  sendSystemMessage(conversationId: string, message: string): any;
 }
 
 declare interface Result {
