@@ -128,6 +128,7 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:ice', (data) => {
+      logger.debug('Ice exchange: ', user.email, data.conversationId);
       const friendId = chatService.findAnotherUserId(user.id.toString(), data.conversationId);
       sockets[friendId].emit('res:ice', data);
     });
