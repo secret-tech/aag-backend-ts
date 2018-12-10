@@ -16,9 +16,9 @@ export class Rating {
   @Column()
   value: number;
 
-  constructor(from: User, to: User, value: number) {
-    this.from = from.id.toString();
-    this.to = to.id.toString();
+  constructor(from: string, to: string, value: number) {
+    this.from = from;
+    this.to = to;
     this.value = value;
   }
 
