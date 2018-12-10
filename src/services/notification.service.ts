@@ -64,6 +64,7 @@ export class NotificationService implements NotificationServiceInterface {
   }
 
   async sendCallNotification(receiver: User, caller: User, conversationId: string) {
+    console.log('OneSignal: ', receiver.services.oneSignal, typeof receiver.services.oneSignal);
     if (typeof receiver.services.oneSignal !== 'string') return false;
     const notificationData = {
       headings: {
