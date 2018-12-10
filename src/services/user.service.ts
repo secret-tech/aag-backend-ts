@@ -197,7 +197,7 @@ export class UserService implements UserServiceInterface {
    */
   async rate(source: User, target: User, rating: number): Promise<boolean> {
     console.log('Rating ' + target.firstName + ' by ' + source.email);
-    if (this.ratingExists(source, target)) { console.log('Rating exists'); return false; }
+    if (await this.ratingExists(source, target)) { console.log('Rating exists'); return false; }
     const ratingToStore = new Rating(source.id.toString(), target.id.toString(), rating);
     if (!target.rating) {
       console.log('!target.rating ', rating);
@@ -215,6 +215,7 @@ export class UserService implements UserServiceInterface {
   private async ratingExists(from: User, to: User) {
     const existingRating = await getConnection().getMongoRepository(Rating).findOne({ from: from.id.toString(), to: to.id.toString() });
     if (!existingRating || existingRating === undefined) {
+      console.log('Rating doesnt exist returning false...');
       return false;
     }
     console.log('Existing rating: ', existingRating);
