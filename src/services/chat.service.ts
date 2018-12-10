@@ -3,9 +3,15 @@ import { User } from '../entities/user';
 import { Message } from '../entities/message';
 import { ObjectID, getConnection } from 'typeorm';
 import { UserNotFound, ConversationNotFound, CustomError } from '../exceptions/exceptions';
+import { NotificationServiceType, NotificationServiceInterface } from './notification.service';
+// import { NotificationServiceType, NotificationServiceInterface } from './notification.service';
 
 @injectable()
 export class ChatService implements ChatServiceInterface {
+
+  constructor(
+    @inject(NotificationServiceType) private notificationService: NotificationServiceInterface
+    ) { }
 
   async sendMessage(from: User, message: ClientChatMessage): Promise<any> {
     const receiver = await getConnection().getRepository(User)
@@ -118,6 +124,11 @@ export class ChatService implements ChatServiceInterface {
     const lastMessage = new Message(conversation, 'Conversation created ');
     lastMessage.system = true;
     await getConnection().mongoManager.save(lastMessage);
+    const advisor = user.role === 'advisor' ? user : friend;
+    const receiver = user.role === 'advisor' ? friend : user;
+    if (typeof receiver.services.oneSignal === 'string') {
+      await this.notificationService.scheduleRatingNotification(receiver.services.oneSignal, advisor);
+    }
     return { users: [user, friend], lastMessage, id: conversation };
   }
 

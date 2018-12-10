@@ -14,6 +14,7 @@ import { ChatServiceType } from '../services/chat.service';
 import { Logger } from '../logger';
 import { User } from '../entities/user';
 import { Message } from '../entities/message';
+import { NotificationServiceInterface, NotificationServiceType } from '../services/notification.service';
 
 /**
  * Create HTTP server.
@@ -28,7 +29,9 @@ createConnection(ormOptions).then(async connection => {
   const authClient: AuthClientInterface = container.get(AuthClientType);
   const userService: UserServiceInterface = container.get(UserServiceType);
   const chatService: ChatServiceInterface = container.get(ChatServiceType);
+  const notificationService: NotificationServiceInterface = container.get(NotificationServiceType);
   const sock = io.of('/');
+  const pushEnabled = (user: User) => { return typeof user.services.oneSignal === 'string'; };
   sock.use(async(socket, next) => {
     let handshake = socket.handshake;
     if (handshake.query.token) {
@@ -57,6 +60,8 @@ createConnection(ormOptions).then(async connection => {
       if (sockets[textMessage.receiver.id.toString()]) {
         sockets[textMessage.receiver.id.toString()].emit('res:receiveMessage', textMessage);
         sockets[textMessage.receiver.id.toString()].emit('res:conversations', await chatService.listConversations(textMessage.receiver.id.toString()));
+      } else {
+        notificationService.sendMessageNotifcation(textMessage);
       }
     });
 
@@ -92,9 +97,11 @@ createConnection(ormOptions).then(async connection => {
       };
       if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
       else {
-        const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + user.firstName);
+        const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Incoming call from ' + user.firstName);
+        const friend = await userService.findUserById(friendId);
         sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
         sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
+        notificationService.sendCallNotification(friend, user, request.conversationId);
       }
     });
 
@@ -113,8 +120,7 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('req:declineCall', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
-      const friend = await userService.findUserById(friendId);
-      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Missed call from ' + friend.firstName);
+      const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Call declined by ' + user.firstName);
       if (sockets[friendId]) {
         sockets[friendId].emit('res:callDeclined', { conversationId: request.conversationId });
         sockets[friendId].emit('res:receiveMessage', systemMessage);
@@ -134,8 +140,8 @@ createConnection(ormOptions).then(async connection => {
         sockets[friendId].emit('res:receiveMessage', systemMessage);
         sockets[friendId].emit('res:conversations', await chatService.listConversations(friendId));
       }
-      sockets[friendId].emit('res:receiveMessage', systemMessage);
-      sockets[friendId].emit('res:conversations', await chatService.listConversations(user.id.toString()));
+      sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
+      sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
     });
 
     socket.on('req:imReady', async(conversationId) => {

@@ -12,12 +12,14 @@ import './controllers/explorer.controller';
 import { FacebookService, FacebookServiceType } from './services/facebook.service';
 import { UserServiceType, UserService } from './services/user.service';
 import { ChatServiceType, ChatService } from './services/chat.service';
+import { NotificationServiceInterface, NotificationServiceType, NotificationService } from './services/notification.service';
 
 let container = new Container();
 
 // services
 container.bind<FacebookServiceInterface>(FacebookServiceType).toConstantValue(new FacebookService());
 container.bind<AuthClientInterface>(AuthClientType).toConstantValue(new AuthClient(config.auth.baseUrl));
+container.bind<NotificationServiceInterface>(NotificationServiceType).toConstantValue(new NotificationService());
 container.bind<UserServiceInterface>(UserServiceType).to(UserService).inSingletonScope();
 container.bind<ChatServiceInterface>(ChatServiceType).to(ChatService).inSingletonScope();
 

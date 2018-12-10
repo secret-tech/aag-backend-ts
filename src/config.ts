@@ -27,7 +27,10 @@ const {
   AUTH_BASE_URL,
   MONGO_URL,
   ACCESS_LOG,
-  SERVICE_NAME
+  SERVICE_NAME,
+  ONESIGNAL_APP_ID,
+  ONESIGNAL_API_KEY,
+  ONESIGNAL_USER_KEY
 } = process.env;
 
 export default {
@@ -61,6 +64,11 @@ export default {
   auth: {
     baseUrl: AUTH_BASE_URL || 'http://auth:3000',
     token: AUTH_JWT
+  },
+  oneSignal: {
+    appId: ONESIGNAL_APP_ID || '',
+    apiKey: ONESIGNAL_API_KEY || '',
+    userKey: ONESIGNAL_USER_KEY || ''
   },
   typeOrm: {
     type: 'mongodb',

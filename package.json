@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon -w ./src -e ts ./src/bin/www --exec ts-node",
+    "work": "nodemon -w ./src -e ts ./src/bin/queue --exec ts-node",
     "lint": "tslint './src/**/*.ts'",
     "lintFix": "tslint --fix './src/**/*.ts'",
     "test": "nyc mocha $(find src -name '*.spec.ts') --require test/prepare.ts --exit",
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "body-parser": "~1.18.3",
+    "bull": "3.5.2",
     "debug": "~3.1.0",
     "dotenv": "6.0.0",
     "express": "~4.16.3",
@@ -28,6 +30,7 @@
     "mongodb": "3.0.10",
     "morgan": "1.9.0",
     "node-uuid": "^1.4.7",
+    "onesignal-node": "2.0.1",
     "passport": "0.4.0",
     "passport-facebook": "2.1.1",
     "redis": "2.8.0",
