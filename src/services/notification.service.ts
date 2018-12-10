@@ -38,6 +38,7 @@ export class NotificationService implements NotificationServiceInterface {
   }
 
   async sendMessageNotifcation(message: Message) {
+    console.log('OneSignal: ', message.receiver.services.oneSignal, typeof message.receiver.services.oneSignal);
     if (typeof message.receiver.services.oneSignal !== 'string') return false;
     const notificationData = {
       headings: {
