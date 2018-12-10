@@ -214,9 +214,10 @@ export class UserService implements UserServiceInterface {
 
   private async ratingExists(from: User, to: User) {
     const existingRating = await getConnection().getMongoRepository(Rating).findOne({ from: from.id.toString(), to: to.id.toString() });
-    if (!existingRating) {
+    if (!existingRating || existingRating === undefined) {
       return false;
     }
+    console.log('Existing rating: ', existingRating);
     return true;
   }
 
