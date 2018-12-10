@@ -1,0 +1,4 @@
+FROM mhart/alpine-node:10.3.0
+WORKDIR /var/www/app
+
+

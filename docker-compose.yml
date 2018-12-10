@@ -10,26 +10,20 @@ services:
     volumes:
       - ./:/usr/src/app
     links:
-      - auth
       - redis
     depends_on:
       - mongo
     tty: true
 
-  auth:
-    image: jincort/backend-auth:production
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      FORCE_HTTPS: disabled
-      JWT_KEY: "uZrJ!xe*xN?!;oU.u*;QOSM+|=4C?WH?6eWPcK/6AkIXIVGQguSA*r"
-      THROTTLER_WHITE_LIST: "*"
-      TENANT_WHITE_LIST: "*"
-    ports:
-      - "3000"
-      - "4000"
+  worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ./:/var/www/app
+    command: "sh -c 'yarn && yarn run work'"
     links:
-      - redis
+        - redis
 
   redis:
     image: jincort/backend-redis:production
