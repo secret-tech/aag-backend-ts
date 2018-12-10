@@ -29,7 +29,7 @@ export class User {
   gender: string;
 
   @Column()
-  rating: Number;
+  rating: number;
 
   @Column()
   birthday?: Date;

@@ -7,6 +7,7 @@ import { AuthClientType } from './auth.client';
 import { validateUser } from '../entities/validators/user.validator';
 import * as faker from 'faker';
 import { Services } from '../entities/services';
+import { Rating } from '../entities/rating';
 
 const ObjectId = require('mongodb').ObjectId;
 
@@ -194,8 +195,21 @@ export class UserService implements UserServiceInterface {
    * @returns {Promise<void>}
    */
   async rate(source: User, target: User, rating: number): Promise<boolean> {
-    // TODO: implement rating system
-    return false;
+    if (this.ratingExists(source, target)) return false;
+    const ratingToStore = new Rating(source, target, rating);
+    if (!target.rating) {
+      target.rating = rating;
+    } else {
+      const amountOfRatings = await getConnection().getMongoRepository(Rating).count({ to: target.id.toString() });
+      target.rating = ((target.rating * amountOfRatings) + rating) / (amountOfRatings + 1);
+    }
+    await getConnection().mongoManager.save([target, ratingToStore]);
+    return true;
+  }
+
+  private async ratingExists(from: User, to: User) {
+    const existingRating = await getConnection().getMongoRepository(Rating).findOne({ from: from.id.toString(), to: to.id.toString() });
+    return typeof existingRating !== 'undefined';
   }
 
   async makeAdvisor(userId: string): Promise<User> {

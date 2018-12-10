@@ -8,6 +8,7 @@ import * as express from 'express';
 import * as validation from './middlewares/request.validation';
 import './controllers/auth.controller';
 import './controllers/user.controller';
+import './controllers/users.controller';
 import './controllers/explorer.controller';
 import { FacebookService, FacebookServiceType } from './services/facebook.service';
 import { UserServiceType, UserService } from './services/user.service';
