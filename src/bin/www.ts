@@ -91,6 +91,7 @@ createConnection(ormOptions).then(async connection => {
 
     socket.on('req:call', async(request) => {
       const friendId = chatService.findAnotherUserId(user.id.toString(), request.conversationId);
+      const friend = await userService.findUserById(friendId);
       calls[request.conversationId] = {
         caller: { id: user.id.toString(), ready: false },
         callee: { id: friendId, ready: false }
@@ -98,11 +99,10 @@ createConnection(ormOptions).then(async connection => {
       if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
       else {
         const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Incoming call from ' + user.firstName);
-        const friend = await userService.findUserById(friendId);
         sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
         sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
-        notificationService.sendCallNotification(friend, user, request.conversationId);
       }
+      notificationService.sendCallNotification(friend, user, request.conversationId);
     });
 
     socket.on('req:acceptCall', async(request) => {
