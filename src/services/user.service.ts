@@ -8,6 +8,7 @@ import { validateUser } from '../entities/validators/user.validator';
 import * as faker from 'faker';
 import { Services } from '../entities/services';
 import { Rating } from '../entities/rating';
+import { Logger } from '../logger';
 
 const ObjectId = require('mongodb').ObjectId;
 
@@ -195,14 +196,18 @@ export class UserService implements UserServiceInterface {
    * @returns {Promise<void>}
    */
   async rate(source: User, target: User, rating: number): Promise<boolean> {
+    console.log('Rating ' + target.firstName + ' by ' + source.email);
     if (this.ratingExists(source, target)) return false;
     const ratingToStore = new Rating(source.id.toString(), target.id.toString(), rating);
     if (!target.rating) {
+      console.log('!target.rating ', rating);
       target.rating = rating;
     } else {
       const amountOfRatings = await getConnection().getMongoRepository(Rating).count({ to: target.id.toString() });
+      console.log('Amoun of ratings', amountOfRatings);
       target.rating = ((target.rating * amountOfRatings) + rating) / (amountOfRatings + 1);
     }
+    console.log('Final rating: ', target.rating);
     await getConnection().mongoManager.save([target, ratingToStore]);
     return true;
   }
