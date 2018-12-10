@@ -197,7 +197,7 @@ export class UserService implements UserServiceInterface {
    */
   async rate(source: User, target: User, rating: number): Promise<boolean> {
     console.log('Rating ' + target.firstName + ' by ' + source.email);
-    if (this.ratingExists(source, target)) return false;
+    if (this.ratingExists(source, target)) { console.log('Rating exists'); return false; }
     const ratingToStore = new Rating(source.id.toString(), target.id.toString(), rating);
     if (!target.rating) {
       console.log('!target.rating ', rating);
