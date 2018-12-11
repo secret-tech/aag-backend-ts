@@ -1,6 +1,9 @@
 import { NotificationService } from '../services/notification.service';
+import { Logger } from '../logger';
 
 const notificationService = new NotificationService();
+
+const logger = Logger.getInstance('NOTIFICATION_WORKER');
 
 notificationService.messageNotificationQueue.process(async(job) => {
   await notificationService.processMessageNotifications(job.data);

@@ -26,7 +26,6 @@ describe('ExplorerController', () => {
   it('Should explore all', async() => {
     const token = 'verified_token';
     getRequest(factory.testApp(), '/explore').set('Authorization', `Bearer ${ token }`).end((err, res) => {
-      console.log(res.body);
       expect(res.status).to.equal(200);
     //   expect(res.body).to.have.property('token');
     //   expect(res.body).to.have.property('user');

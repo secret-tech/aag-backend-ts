@@ -96,8 +96,9 @@ createConnection(ormOptions).then(async connection => {
         caller: { id: user.id.toString(), ready: false },
         callee: { id: friendId, ready: false }
       };
-      if (sockets[friendId]) sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
-      else {
+      if (sockets[friendId]) {
+        sockets[friendId].emit('res:incomingCall', { conversationId: request.conversationId, user });
+      } else {
         const systemMessage = await chatService.sendSystemMessage(request.conversationId, 'Incoming call from ' + user.firstName);
         sockets[user.id.toString()].emit('res:receiveMessage', systemMessage);
         sockets[user.id.toString()].emit('res:conversations', await chatService.listConversations(user.id.toString()));
@@ -132,7 +133,6 @@ createConnection(ormOptions).then(async connection => {
     });
 
     socket.on('req:hangup', async(conversationId) => {
-      console.log('ConversationId: ', conversationId);
       const friendId = chatService.findAnotherUserId(user.id.toString(), conversationId);
       const systemMessage = await chatService.sendSystemMessage(conversationId, 'Call ended');
       if (sockets[friendId]) {
@@ -195,4 +195,4 @@ createConnection(ormOptions).then(async connection => {
     httpsServer.listen(config.app.httpsPort);
 
   }
-}).catch(error => console.log('TypeORM connection error: ', error));
+}).catch(error => logger.error('TypeORM connection error: ', error));
